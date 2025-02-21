@@ -2,6 +2,7 @@ import { Contact } from "baileys";
 import { logger } from "../../utils/logger";
 import fs from "fs";
 import path from "path";
+import AppError from "../../errors/AppError";
 
 class ContactStore {
   private contacts: Map<string, Contact>;
@@ -20,19 +21,19 @@ class ContactStore {
         const data = fs.readFileSync(this.filePath, "utf-8");
         const parsedContacts: Contact[] = JSON.parse(data);
         parsedContacts.forEach((contact) => this.contacts.set(contact.id, contact));
-        logger.info(`📂 Contatos carregados do arquivo: ${this.filePath}`);
+        logger.info(`📂 Contacts loaded from file: ${this.filePath}`);
       }
     } catch (error) {
-      logger.error(`❌ Erro ao carregar contatos: ${(error as Error).message}`);
+      throw new AppError(`❌ Error loading contacts. Error: ${(error as Error).message}`);
     }
   }
 
   private saveContacts() {
     try {
       fs.writeFileSync(this.filePath, JSON.stringify(Array.from(this.contacts.values()), null, 2));
-      logger.info(`📁 Contatos salvos no arquivo: ${this.filePath}`);
+      logger.info(`📁 Contacts saved in the file: ${this.filePath}`);
     } catch (error) {
-      logger.error(`❌ Erro ao salvar contatos: ${(error as Error).message}`);
+      throw new AppError(`❌ Error saving contacts. Error: ${(error as Error).message}`);
     }
   }
 

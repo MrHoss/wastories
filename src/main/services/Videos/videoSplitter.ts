@@ -36,7 +36,7 @@ export default async function videoSplitter(videoPath: string, sessionId: string
         .map(file => path.join(outputDir, file)); // Retorna caminhos completos
       await sendVideosToStories(session.getSocket(), videoFiles);
     }else{
-      logger.error(`Session ID not found. SessionID: ${sessionId}`);
+      throw new AppError(`Session ID not found. SessionID: ${sessionId}`);
     }
   } catch (error) {
     throw new AppError((error as Error).message, 500);

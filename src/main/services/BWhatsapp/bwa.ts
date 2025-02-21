@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Boom } from "@hapi/boom";
 import { mainWindow } from "../..";
 
-
 export interface Session extends WASocket {
   id: string;
   qrCode?: string;
@@ -28,15 +27,15 @@ class BWhatsapp {
     // Se a instância não existir, cria e armazena uma nova instância
     if (!BWhatsapp.instances.has(this.sessionId)) {
       BWhatsapp.instances.set(this.sessionId, this);
-      logger.info(`Instance created for session ${this.sessionId}`);
+      logger.info(`🆕 New instance created for session ${this.sessionId}`);
     } else {
-      throw new AppError(`Instance already exists for session ${this.sessionId}`);
-    };
-  };
+      throw new AppError(`⚠️ Instance already exists for session ${this.sessionId}`);
+    }
+  }
 
   public static getInstance(sessionId: string): BWhatsapp | null {
     return BWhatsapp.instances.get(sessionId) ?? null;
-  };
+  }
 
   public static listSessions(): { id: string; qrCode?: string }[] {
     return Array.from(BWhatsapp.sessions.values()).map(session => ({
@@ -44,17 +43,14 @@ class BWhatsapp {
       qrCode: session.qrCode,
       status: session.status
     }));
-  };
+  }
 
-
-  public static async startStoredSessions(handler?: (events: Partial<BaileysEventMap>, session:BWhatsapp) => void | Promise<void>): Promise<void> {
+  public static async startStoredSessions(handler?: (events: Partial<BaileysEventMap>, session: BWhatsapp) => void | Promise<void>): Promise<void> {
     const authsPath = ".auth";
-    logger.info("Starting stored sessions");
+    logger.info("📂 Loading stored sessions...");
     try {
       const files = fs.readdirSync(authsPath, { withFileTypes: true });
-      const directories = files
-        .filter(file => file.isDirectory())
-        .map(dirent => dirent.name);
+      const directories = files.filter(file => file.isDirectory()).map(dirent => dirent.name);
 
       const startPromises = directories.map(dirname => {
         const instance = new BWhatsapp(dirname);
@@ -62,19 +58,19 @@ class BWhatsapp {
       });
 
       await Promise.all(startPromises);
-      logger.info("All sessions have been started.");
+      logger.info("✅ All sessions started successfully.");
     } catch (err) {
-      logger.error(`Failed to start all sessions from files. Error: ${(err as Error).message}`);
-    };
-  };
+      logger.error(`❌ Failed to start sessions. Error: ${(err as Error).message}`);
+    }
+  }
 
   public async initSocket(handler?: (events: Partial<BaileysEventMap>, session: BWhatsapp) => void | Promise<void>): Promise<Session> {
     return new Promise((resolve, reject) => {
       try {
         (async () => {
-          logger.info("🔄 Connecting...");
+          logger.info("🔄 Connecting to WhatsApp...");
 
-          logger.info(`✅ Session created on ${this.getAuthPath()}`);
+          logger.info(`🔐 Session auth credentials stored at ${this.getAuthPath()}`);
           const { state } = await useMultiFileAuthState(this.getAuthPath());
           const { version, isLatest } = await fetchLatestBaileysVersion();
 
@@ -90,20 +86,21 @@ class BWhatsapp {
             id: this.sessionId,
             ...makeWASocket(socketConfig)
           };
-          logger.info(`✅ Session ${this.sessionId} started, using WA v${version.join('.')}, isLatest: ${isLatest}`);
+
+          logger.info(`🚀 Session ${this.sessionId} started (WA v${version.join('.')}, latest: ${isLatest})`);
           mainWindow.webContents.send('session-update', { id: socket.id, status: socket.status || "initializing", qrCode: socket.qrCode });
 
           if (!BWhatsapp.sessions.has(this.sessionId)) {
             BWhatsapp.sessions.set(this.sessionId, socket);
           }
-          logger.info(`Socket created ${socket.id}`);
+          logger.info(`🔌 Socket initialized successfully for session ${socket.id}`);
           resolve(socket);
           this.initMonitor(handler);
         })();
       } catch (err) {
-        logger.error((err as Error).message);
+        logger.error(`❌ Connection error: ${(err as Error).message}`);
         reject(err);
-      };
+      }
     });
   };
 
@@ -139,7 +136,7 @@ class BWhatsapp {
               break;
           }
           if (qr) {
-            logger.info(`☑️ Session ${this.sessionId} QRCode generated`);
+            logger.info(`🆗 Session ${this.sessionId} QRCode generated`);
             socket.qrCode = qr;
             socket.status = "qrcode";
           }
@@ -150,7 +147,7 @@ class BWhatsapp {
           });
         }
         if (events["creds.update"]) {
-          logger.info("⬆️ Auth credentials updated");
+          logger.info("🔐 Auth credentials updated");
           saveCreds();
         }
         if (handler) {
@@ -178,7 +175,7 @@ class BWhatsapp {
         session.logout(); // Presumindo que logout é uma operação síncrona
         session.ws.close();
         BWhatsapp.sessions.delete(this.sessionId);
-        logger.warn(`Clearing session ${this.sessionId} from memory`);
+        logger.warn(`❌ Clearing session ${this.sessionId} from memory`);
       };
       if (clearAuth) {
         try {
@@ -187,9 +184,9 @@ class BWhatsapp {
           fs.rmSync(this.getAuthPath(), { recursive: true });
         } catch (err) {
           if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-            logger.warn(`Auth credentials not found for session "${this.sessionId}"`);
+            logger.warn(`🔒 Auth credentials not found for session "${this.sessionId}"`);
           } else {
-            logger.warn(`Error accessing or removing auth path. Err: ${(err as Error).message}`);
+            logger.warn(`❌ Error accessing or removing auth path. Err: ${(err as Error).message}`);
           };
         };
       } else {

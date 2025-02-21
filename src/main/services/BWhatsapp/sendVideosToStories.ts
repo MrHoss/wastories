@@ -3,6 +3,7 @@ import fs from "fs";
 import BWhatsapp, { Session } from "./bwa";
 import { logger } from "../../utils/logger";
 import ContactStore from "./contactStore";
+import AppError from "../../errors/AppError";
 
 export default async function sendVideosToStories(socket: Session, videoPaths: string[]) {
   try {
@@ -23,10 +24,10 @@ export default async function sendVideosToStories(socket: Session, videoPaths: s
         });
         logger.info(`✅ Vídeo enviado: ${videoPath}`);
       }else{
-        logger.error(`❌ Erro ao enviar vídeos para os stories. Erro: Cannot get connection jid: '${myJid}'.`);
+        throw new AppError(`❌ Erro ao enviar vídeos para os stories. Erro: Cannot get connection jid: '${myJid}'.`);
       }
     }
   } catch (error) {
-    logger.error(`❌ Erro ao enviar vídeos para os stories. Error: ${(error as Error).message}`);
+    throw new AppError(`❌ Erro ao enviar vídeos para os stories. Error: ${(error as Error).message}`);
   }
 }

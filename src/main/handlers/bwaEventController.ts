@@ -2,6 +2,7 @@ import { BaileysEventMap, Contact } from "baileys";
 import { logger } from "../utils/logger";
 import ContactStore from "../services/BWhatsapp/contactStore";
 import BWhatsapp from "../services/BWhatsapp/bwa";
+import AppError from "../errors/AppError";
 
 
 async function bwaEventHandler(events: Partial<BaileysEventMap>, session:BWhatsapp): Promise<void> {
@@ -13,7 +14,7 @@ async function bwaEventHandler(events: Partial<BaileysEventMap>, session:BWhatsa
       for (const contact of events["contacts.update"]) {
         if (contact.id) {
           contactStore.addContact(contact as Contact);
-          logger.info(`📥 Contato atualizado: ${contact.id}`);
+          logger.info(`📥 Contact updated: ${contact.id}`);
         }
       }
     }
@@ -21,7 +22,7 @@ async function bwaEventHandler(events: Partial<BaileysEventMap>, session:BWhatsa
       for (const contact of events["contacts.upsert"]) {
         if (contact.id) {
           contactStore.addContact(contact as Contact);
-          logger.info(`📥 Contato atualizado: ${contact.id}`);
+          logger.info(`📥 Contact updated: ${contact.id}`);
         }
       }
     }
@@ -36,7 +37,7 @@ async function bwaEventHandler(events: Partial<BaileysEventMap>, session:BWhatsa
     // }
 
   } catch (error) {
-    logger.error(`❌ Erro no evento Baileys: ${(error as Error).message}`);
+    throw new AppError(`❌ Baileys event error: ${(error as Error).message}`);
   }
 }
 
