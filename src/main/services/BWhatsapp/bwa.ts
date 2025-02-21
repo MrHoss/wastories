@@ -5,6 +5,7 @@ import { logger, loggerBaileys } from "../../utils/logger";
 import { v4 as uuidv4 } from "uuid";
 import { Boom } from "@hapi/boom";
 import { mainWindow } from "../..";
+import path from "path";
 
 export interface Session extends WASocket {
   id: string;
@@ -197,9 +198,9 @@ class BWhatsapp {
     };
   };
 
-  public getAuthPath = () => `.auth/${this.sessionId}`;
+  public getAuthPath = () => path.join('.auth',this.sessionId);
 
-  public static getAuthPathBySessionId = (sessionId:string) => `.auth/${sessionId}`;
+  public static getAuthPathBySessionId = (sessionId: string) => path.join('.auth', sessionId);
 }
 
 export default BWhatsapp;

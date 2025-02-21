@@ -9,7 +9,7 @@ export default async function videoSplitter(videoPath: string, sessionId: string
   try {
     const session = BWhatsapp.getInstance(sessionId);
     if (session) {
-      const outputDir = ('output'); // Diretório para armazenar as partes
+      const outputDir = path.join('output'); // Diretório para armazenar as partes
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir);
       };
