@@ -4,7 +4,6 @@ import path from "path";
 import AppError from "../../errors/AppError";
 import sendVideosToStories from "../BWhatsapp/sendVideosToStories";
 import BWhatsapp from "../BWhatsapp/bwa";
-import { logger } from "../../utils/logger";
 
 export default async function videoSplitter(videoPath: string, sessionId: string) {
   try {
