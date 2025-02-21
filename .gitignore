@@ -4,3 +4,4 @@ out
 .DS_Store
 *.log*
 .auth/*
+output/output-000.mp4
