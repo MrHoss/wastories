@@ -1,6 +1,16 @@
 # wastories
 
-An Electron application with React and TypeScript
+---
+
+### **WAStories - Upload Long Videos to WhatsApp Stories**  
+Tired of manually cutting your videos to post on WhatsApp Stories? **WAStories** does it for you!  
+With just a few clicks, it splits long videos into 30-second segments and uploads them automatically, ensuring seamless sharing without abrupt cuts.  
+
+✅ **Fast and automatic**  
+✅ **Supports multiple video formats**  
+✅ **Simple and intuitive interface**  
+
+Share your moments without limits! 🚀
 
 ## Recommended IDE Setup
 
