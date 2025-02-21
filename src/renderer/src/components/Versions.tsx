@@ -1,12 +1,15 @@
+import Paper from '@renderer/@emotion-custom/Paper';
 import { useState } from 'react';
 
 function Versions(): JSX.Element {
   const [appVersion] = useState(window.appVersion);
 
   return (
-    <ul className="versions">
-      <li className="electron-version">WAStories {appVersion}</li>
-    </ul>
+    <Paper style={{ textAlign: 'center' }}>
+      <ul>
+        <li>WAStories {appVersion}</li>
+      </ul>
+    </Paper>
   );
 };
 

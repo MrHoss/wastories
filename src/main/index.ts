@@ -1,13 +1,15 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { app, shell, BrowserWindow } from 'electron';
 import path from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
-import fs from "fs";
-import ffmpeg from 'fluent-ffmpeg';
 import icon from '../../resources/icon.png?asset';
-
+import { logger } from './utils/logger';
+import BWhatsapp from './services/BWhatsapp/bwa';
+import ipcController from './handlers/ipcController';
+import bwaEventHandler from './handlers/bwaEventController';
+export let mainWindow: BrowserWindow;
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -16,9 +18,7 @@ function createWindow(): void {
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false
-    },
-
-
+    }
   });
 
   mainWindow.on('ready-to-show', () => {
@@ -54,37 +54,7 @@ app.whenReady().then(() => {
   });
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
-
-  ipcMain.handle('upload-video-and-split', async (event, videoPath: string) => {
-    try {
-      const outputDir = path.join(__dirname, 'output'); // Diretório para armazenar as partes
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
-      };
-
-      // Comando para dividir o vídeo em partes de 30 segundos
-      await new Promise<void>((resolve, reject) => {
-        ffmpeg(videoPath)
-          .output(path.join(outputDir, 'output-%03d.mp4')) // Nome dos arquivos divididos
-          .audioCodec('aac')
-          .videoCodec('libx264')
-          .outputOptions([
-            '-f', 'segment', // Define o formato de segmento
-            '-segment_time', '29', // Divide a cada 30 segundos
-            '-reset_timestamps', '1', // Reseta os timestamps a cada novo arquivo
-          ])
-          .on('end', () => resolve()) // Sucesso
-          .on('error', (err) => reject(err)) // Erro
-          .run();
-      });
-
-      return 'Vídeo dividido com sucesso!';
-    } catch (error) {
-      console.error('Erro ao dividir o vídeo:', error);
-      throw new Error('Falha ao dividir o vídeo.');
-    };
-  });
+  ipcController();
 
 
   createWindow();
@@ -104,6 +74,14 @@ app.on('window-all-closed', () => {
     app.quit();
   };
 });
+
+logger.info("App started");
+try{
+  BWhatsapp.startStoredSessions(bwaEventHandler);
+} catch (err){
+  logger.error((err as Error).message);
+}
+
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
