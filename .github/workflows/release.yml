@@ -38,11 +38,17 @@ jobs:
           fi
         shell: bash
 
-      - name: Upload artifacts
+      - name: Upload installer artifacts only
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-artifacts
-          path: dist/**
+          name: ${{ runner.os }}-installers
+          path: |
+            dist/**/*.AppImage
+            dist/**/*.deb
+            dist/**/*.snap
+            dist/**/*.exe
+            dist/**/*.dmg
+            dist/**/*.zip
 
   release:
     needs: build
@@ -63,6 +69,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          files: artifacts/**
+          files: artifacts/**/*.*
         env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}  # Use token padrão do GitHub Actions
+          GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
