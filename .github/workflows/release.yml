@@ -43,7 +43,14 @@ jobs:
         with:
           name: ${{ runner.os }}-installers
           path: |
-            dist/**/wastories*
+            dist/**/wastories*.AppImage
+            dist/**/wastories*.deb
+            dist/**/wastories*.snap
+            dist/**/wastories*.exe
+            dist/**/wastories*.dmg
+            dist/**/wastories*.zip
+            dist/**/linux-unpacked
+            dist/**/win-unpacked
 
   release:
     needs: build
